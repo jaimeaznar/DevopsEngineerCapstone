@@ -75,9 +75,11 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      
       - run:
           name: Install dependencies
           command: yum install -y tar gzip
+      
       - run:
           name: Ensure EKS network exists
           command: |
@@ -87,6 +89,18 @@ jobs:
               --stack-name "${ENVIRONMENT_NAME}-eks-network" \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides file://cloudformation/network-parameters.json
+      
+      - run:
+          name: Ensure EKS Cluster exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/cluster.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-cluster" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/cluster-parameters.json \
+              --capabilities CAPABILITY_NAMED_IAM
+          no_output_timeout: 15m
      
       - destroy_environment
   
@@ -98,12 +112,9 @@ jobs:
         - run:
             name: Delete Stack to avoid costs
             command: |           
-                if
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
                 echo "=======================Delete Confirmed========================"
-                else
-                echo "=======================Didn't delete========================"            
-                fi
+                
 workflows:
   default:
     jobs:
