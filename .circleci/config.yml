@@ -127,6 +127,4 @@ workflows:
       - deploy-infrastructure:
           requires:
             - test-build
-      - cleanup:
-          requires:
-            - deploy-infrastructure
+      
