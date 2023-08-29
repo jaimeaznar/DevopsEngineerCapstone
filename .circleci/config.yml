@@ -103,7 +103,7 @@ jobs:
               --capabilities CAPABILITY_NAMED_IAM
           no_output_timeout: 15m
      
-      - destroy_environment
+      # - destroy_environment
   
   cleanup:
         docker:
