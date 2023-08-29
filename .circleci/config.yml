@@ -8,8 +8,9 @@ commands:
               name: Destroy environments
               when: on_fail
               command: |
-                  aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
-                  aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
 
 jobs:
   test-build:
@@ -102,6 +103,17 @@ jobs:
               --parameter-overrides file://cloudformation/cluster-parameters.json \
               --capabilities CAPABILITY_NAMED_IAM
           no_output_timeout: 15m
+      
+      - run:
+          name: Ensure Nodegroup exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/nodegroup.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-nodegroup" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/nodegroup-parameters.json \
+              --capabilities CAPABILITY_NAMED_IAM
      
       - destroy_environment
   
@@ -113,8 +125,9 @@ jobs:
         - run:
             name: Delete Stack to avoid costs
             command: |           
-                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
                 echo "=======================Delete Confirmed========================"
                 
 workflows:
