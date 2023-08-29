@@ -9,6 +9,7 @@ commands:
               when: on_fail
               command: |
                   aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+                  aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
 
 jobs:
   test-build:
@@ -113,6 +114,7 @@ jobs:
             name: Delete Stack to avoid costs
             command: |           
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
                 echo "=======================Delete Confirmed========================"
                 
 workflows:
