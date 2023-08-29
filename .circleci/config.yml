@@ -3,11 +3,11 @@ version: 2.1
 commands:    
     destroy_environment:
         description: Destroy cloudformation
-            - run:
-                name: Destroy environments
-                when: on_fail
-                command: |
-                    aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+          - run:
+              name: Destroy environments
+              when: on_fail
+              command: |
+                  aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
 
 jobs:
   test-build:
