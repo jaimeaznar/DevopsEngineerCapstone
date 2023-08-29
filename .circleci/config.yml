@@ -1,5 +1,14 @@
 version: 2.1
 
+commands:    
+    destroy_environment:
+        description: Destroy cloudformation
+            - run:
+                name: Destroy environments
+                when: on_fail
+                command: |
+                    aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+
 jobs:
   test-build:
     docker:
@@ -77,7 +86,23 @@ jobs:
               --stack-name "${ENVIRONMENT_NAME}-eks-network" \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides file://cloudformation/network-parameters.json
-
+     
+      - destroy_environment
+  
+  cleanup:
+        docker:
+        - image: amazon/aws-cli
+        steps:
+        - checkout
+        - run:
+            name: Delete Stack to avoid costs
+            command: |           
+                if
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+                echo "=======================Delete Confirmed========================"
+                else
+                echo "=======================Didn't delete========================"            
+                fi
 workflows:
   default:
     jobs:
@@ -88,3 +113,6 @@ workflows:
       - deploy-infrastructure:
           requires:
             - test-build
+      - cleanup:
+          requires:
+            - deploy-infrastructure
