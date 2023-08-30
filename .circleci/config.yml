@@ -126,8 +126,24 @@ jobs:
               --parameter-overrides file://cloudformation/management-parameters.json \
               --output text >> ~/checkIfDeployed.txt
             cat ~/checkIfDeployed.txt
+            
+      - run:
+          name: Extract the IPs of the management instances for Ansible
+          command: |
+            echo [management] > ~/inventory.txt
+            aws ec2 describe-instances \
+              --region "${AWS_DEFAULT_REGION}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-management*" \
+              --output text >> ~/inventory.txt
+            cat ~/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - inventory.txt
+            - checkIfDeployed.txt
      
-      # - destroy_environment
+      - destroy_environment
   
   cleanup:
         docker:
@@ -153,6 +169,6 @@ workflows:
       - deploy-infrastructure:
           requires:
             - test-build
-      # - cleanup:
-      #     requires:
-      #       - deploy-infrastructure
+      - cleanup:
+          requires:
+            - deploy-infrastructure
