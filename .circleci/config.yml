@@ -8,6 +8,7 @@ commands:
               name: Destroy environments
               when: on_fail
               command: |
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-management
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
@@ -114,6 +115,17 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides file://cloudformation/nodegroup-parameters.json \
               --capabilities CAPABILITY_NAMED_IAM
+      - run:
+          name: Ensure management instances exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/management.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-management" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/management-parameters.json \
+              --output text >> ~/checkIfDeployed.txt
+            cat ~/checkIfDeployed.txt
      
       - destroy_environment
   
@@ -124,7 +136,8 @@ jobs:
         - checkout
         - run:
             name: Delete Stack to avoid costs
-            command: |           
+            command: |
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-management
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
                 aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
