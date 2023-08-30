@@ -127,7 +127,7 @@ jobs:
               --output text >> ~/checkIfDeployed.txt
             cat ~/checkIfDeployed.txt
      
-      - destroy_environment
+      # - destroy_environment
   
   cleanup:
         docker:
@@ -153,6 +153,6 @@ workflows:
       - deploy-infrastructure:
           requires:
             - test-build
-      - cleanup:
-          requires:
-            - deploy-infrastructure
+      # - cleanup:
+      #     requires:
+      #       - deploy-infrastructure
