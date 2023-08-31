@@ -28,16 +28,16 @@ Resources:
           ToPort: 22
           CidrIp: 0.0.0.0/0
 
-  # managementHost1:
-  #   Type: AWS::EC2::Instance
-  #   Properties:
-  #     InstanceType: t2.micro
-  #     SecurityGroups:
-  #       - Ref: InstanceSecurityGroup
-  #     KeyName: !Ref SSHKeyName
-  #     ImageId: !Ref amiImageId
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub ${EnvironmentName}-management1
-  #       - Key: Project
-  #         Value: !Ref EnvironmentName
+  managementHost1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SecurityGroups:
+        - Ref: InstanceSecurityGroup
+      KeyName: !Ref SSHKeyName
+      ImageId: !Ref amiImageId
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-management1
+        - Key: Project
+          Value: !Ref EnvironmentName
