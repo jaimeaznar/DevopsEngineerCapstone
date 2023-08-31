@@ -281,5 +281,5 @@ workflows:
             - configure-cluster
       - cleanup:
           requires:
-            - configure-infrastructure
+            - configure-cluster
       
