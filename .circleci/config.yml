@@ -157,6 +157,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
+          name: Wait 3 min
+          command: |
+            echo "Wait 180 seconds..."
+            sleep 180
+              
+      - run:
           name: Install dependencies
           command: |
             apk add --update ansible
@@ -184,7 +190,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install dependencies
+          name: Wait 3 min
+          command: |
+            echo "Wait 180 seconds..."
+            sleep 180
+      - run:
+          name: Install ansible dependencies
           command: |
             apk add --update ansible
       - run:
