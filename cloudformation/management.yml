@@ -36,6 +36,7 @@ Resources:
         - Ref: InstanceSecurityGroup
       KeyName: !Ref SSHKeyName
       ImageId: !Ref amiImageId
+      DisableRollback: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-management1
@@ -50,6 +51,7 @@ Resources:
         - Ref: InstanceSecurityGroup
       KeyName: !Ref SSHKeyName
       ImageId: !Ref amiImageId
+      DisableRollback: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-management2
