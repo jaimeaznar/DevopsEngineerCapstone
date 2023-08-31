@@ -143,7 +143,35 @@ jobs:
             - inventory.txt
             - checkIfDeployed.txt
      
-      # - destroy_environment
+      - destroy_environment
+      
+  
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
+              then
+                cat ~/inventory.txt
+                echo "Our management instances are already configured."
+              else
+                cat ~/inventory.txt
+                cd ansible
+                ansible-playbook -i ~/inventory.txt configure-server.yml
+              fi
   
   cleanup:
         docker:
@@ -169,6 +197,9 @@ workflows:
       - deploy-infrastructure:
           requires:
             - test-build
-      # - cleanup:
-      #     requires:
-      #       - deploy-infrastructure
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
+      - cleanup:
+          requires:
+            - deploy-infrastructure
