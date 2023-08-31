@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: CapstoneProject-app
-          image: jaiazn/CapstoneProject
+          image: jaiazn/capstone
           ports:
             - containerPort: 80
