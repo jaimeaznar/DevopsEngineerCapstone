@@ -167,6 +167,11 @@ jobs:
           command: |
             apk add --update ansible
       - run:
+          name: Install SSH client
+          command: |
+            apk update
+            apk add openssh-client
+      - run:
           name: Configure server
           command: |
             if grep -q "No changes to deploy" ~/checkIfDeployed.txt
