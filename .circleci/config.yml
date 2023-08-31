@@ -208,7 +208,7 @@ jobs:
                 echo "Our management instances are already configured."
               else
                 cat ~/inventory.txt
-                echo "Wait 60 seconds..."
+                echo "Wait 180 seconds..."
                 sleep 60
               fi
       - run:
