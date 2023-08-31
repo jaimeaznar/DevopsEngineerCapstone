@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: CapstoneProject-deployment
+  labels:
+    app: CapstoneProject-app
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: CapstoneProject-app
+  template:
+    metadata:
+      labels:
+        app: CapstoneProject-app
+    spec:
+      containers:
+        - name: CapstoneProject-app
+          image: jaiazn/CapstoneProject
+          ports:
+            - containerPort: 80

@@ -1,5 +1,5 @@
 Description: >
-  Jaime Aznar / Capstone Project
+  Jaime Aznar / CapstoneProject
   EKS Cluster
 Parameters:
   EnvironmentName:
