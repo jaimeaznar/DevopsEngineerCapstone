@@ -30,13 +30,14 @@ Resources:
 
   managementHost1:
     Type: AWS::EC2::Instance
+    DisableRollback: false
+
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
       KeyName: !Ref SSHKeyName
       ImageId: !Ref amiImageId
-      DisableRollback: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-management1
@@ -45,13 +46,13 @@ Resources:
 
   managementHost2:
     Type: AWS::EC2::Instance
+    DisableRollback: false
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
       KeyName: !Ref SSHKeyName
       ImageId: !Ref amiImageId
-      DisableRollback: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-management2
