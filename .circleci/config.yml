@@ -170,7 +170,7 @@ jobs:
               else
                 cat ~/inventory.txt
                 cd ansible
-                ansible-playbook -i ~/inventory.txt configure-server.yml
+                ansible-playbook -i ~/inventory.txt configure-server.yml -vvv
               fi
   
   configure-cluster:
@@ -209,14 +209,14 @@ jobs:
               else
                 cat ~/inventory.txt
                 echo "Wait 180 seconds..."
-                sleep 60
+                sleep 180
               fi
       - run:
           name: Display the LoadBalancer's DNS name
           command: |
             cat ~/inventory.txt
             cd ansible
-            ansible-playbook -i ~/inventory.txt save-elb-dns.yml
+            ansible-playbook -i ~/inventory.txt save-elb-dns.yml -vvv
             cat ~/elb_dns.txt
       - persist_to_workspace:
           root: ~/
@@ -242,7 +242,7 @@ jobs:
           command: |
             cat ~/inventory.txt
             cd ansible
-            ansible-playbook -i ~/inventory.txt deploy-app.yml
+            ansible-playbook -i ~/inventory.txt deploy-app.yml -vvv
           no_output_timeout: 2m
   
   cleanup:
