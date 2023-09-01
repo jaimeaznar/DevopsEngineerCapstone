@@ -1,4 +1,4 @@
-- name: "Deploy latest app"
+- name: "Deploy app"
   hosts: management[0]
   user: ubuntu
   gather_facts: false

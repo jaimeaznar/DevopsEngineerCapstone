@@ -1,5 +1,5 @@
 ---
-- name: "Save LoadBalancer's DNS name locally"
+- name: "Save LoadBalancer's DNS name"
   hosts: management[0]
   user: ubuntu
   gather_facts: false
@@ -13,7 +13,7 @@
       args:
         chdir: $HOME
 
-    - name: Copy the output to a local file
+    - name: Copy to file
       copy:
         content: "{{ elb_dns.stdout }}"
         dest: "~/elb_dns.txt"
