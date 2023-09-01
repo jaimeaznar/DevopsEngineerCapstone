@@ -157,10 +157,10 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Wait 2 min
+          name: Wait
           command: |
-            echo "Wait 120 seconds..."
-            sleep 120
+            echo "Wait 180 seconds..."
+            sleep 180
               
       - run:
           name: Install dependencies
@@ -195,10 +195,10 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Wait 2 min
+          name: Wait
           command: |
-            echo "Wait 120 seconds..."
-            sleep 120
+            echo "Wait 180 seconds..."
+            sleep 180
       - run:
           name: Install ansible dependencies
           command: |
@@ -229,8 +229,8 @@ jobs:
                 echo "Our management instances are already configured."
               else
                 cat ~/inventory.txt
-                echo "Wait 120 seconds..."
-                sleep 120
+                echo "Wait 180 seconds..."
+                sleep 180
               fi
       - run:
           name: Display LoadBalancer's DNS name
