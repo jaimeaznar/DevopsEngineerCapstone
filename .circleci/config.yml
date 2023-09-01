@@ -60,7 +60,7 @@ jobs:
           version: 19.03.13
 
       - run:
-          name: Build docker container
+          name: Build container
           command: |
             docker build --tag=$DOCKER_IMAGE_NAME .
             docker image ls
