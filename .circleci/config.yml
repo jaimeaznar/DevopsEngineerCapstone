@@ -47,264 +47,264 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
   
-  # upload-docker:
-  #   docker:
-  #     - image: circleci/golang:1.15
+  upload-docker:
+    docker:
+      - image: circleci/golang:1.15
 
-  #   working_directory: ~/repo
+    working_directory: ~/repo
 
-  #   steps:
-  #     - checkout
+    steps:
+      - checkout
 
-  #     - setup_remote_docker:
-  #         version: 19.03.13
+      - setup_remote_docker:
+          version: 19.03.13
 
-  #     - run:
-  #         name: Build docker container
-  #         command: |
-  #           docker build --tag=$DOCKER_IMAGE_NAME .
-  #           docker image ls
+      - run:
+          name: Build docker container
+          command: |
+            docker build --tag=$DOCKER_IMAGE_NAME .
+            docker image ls
 
-  #     - run:
-  #         name: Upload to Dockerhub
-  #         command: |
-  #           echo "Docker ID and Image: $DOCKER_IMAGE_NAME"
-  #           docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
-  #           docker tag $DOCKER_IMAGE_NAME $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
-  #           docker push $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
+      - run:
+          name: Upload to Dockerhub
+          command: |
+            echo "Docker ID and Image: $DOCKER_IMAGE_NAME"
+            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
+            docker tag $DOCKER_IMAGE_NAME $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
+            docker push $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
   
-  # deploy-infrastructure:
-  #   docker:
-  #     - image: amazon/aws-cli
-  #   steps:
-  #     - checkout
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
       
-  #     - run:
-  #         name: Install dependencies
-  #         command: yum install -y tar gzip
+      - run:
+          name: Install dependencies
+          command: yum install -y tar gzip
       
-  #     - run:
-  #         name: Ensure EKS network exists
-  #         command: |
-  #           aws cloudformation deploy \
-  #             --template-file cloudformation/network.yml \
-  #             --tags project=${ENVIRONMENT_NAME}-project \
-  #             --stack-name "${ENVIRONMENT_NAME}-eks-network" \
-  #             --region ${AWS_DEFAULT_REGION} \
-  #             --parameter-overrides file://cloudformation/network-parameters.json
+      - run:
+          name: Ensure EKS network exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/network.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-network" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/network-parameters.json
       
-  #     - run:
-  #         name: Ensure EKS Cluster exists
-  #         command: |
-  #           aws cloudformation deploy \
-  #             --template-file cloudformation/cluster.yml \
-  #             --tags project=${ENVIRONMENT_NAME}-project \
-  #             --stack-name "${ENVIRONMENT_NAME}-eks-cluster" \
-  #             --region ${AWS_DEFAULT_REGION} \
-  #             --parameter-overrides file://cloudformation/cluster-parameters.json \
-  #             --capabilities CAPABILITY_NAMED_IAM
-  #         no_output_timeout: 15m
+      - run:
+          name: Ensure EKS Cluster exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/cluster.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-cluster" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/cluster-parameters.json \
+              --capabilities CAPABILITY_NAMED_IAM
+          no_output_timeout: 15m
       
-  #     - run:
-  #         name: Ensure Nodegroup exists
-  #         command: |
-  #           aws cloudformation deploy \
-  #             --template-file cloudformation/nodegroup.yml \
-  #             --tags project=${ENVIRONMENT_NAME}-project \
-  #             --stack-name "${ENVIRONMENT_NAME}-eks-nodegroup" \
-  #             --region ${AWS_DEFAULT_REGION} \
-  #             --parameter-overrides file://cloudformation/nodegroup-parameters.json \
-  #             --capabilities CAPABILITY_NAMED_IAM
-  #     - run:
-  #         name: Ensure management instances exists
-  #         command: |
-  #           aws cloudformation deploy \
-  #             --template-file cloudformation/management.yml \
-  #             --tags project=${ENVIRONMENT_NAME}-project \
-  #             --stack-name "${ENVIRONMENT_NAME}-eks-management" \
-  #             --region ${AWS_DEFAULT_REGION} \
-  #             --parameter-overrides file://cloudformation/management-parameters.json \
-  #             --output text >> ~/checkIfDeployed.txt
-  #           cat ~/checkIfDeployed.txt
+      - run:
+          name: Ensure Nodegroup exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/nodegroup.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-nodegroup" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/nodegroup-parameters.json \
+              --capabilities CAPABILITY_NAMED_IAM
+      - run:
+          name: Ensure management instances exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/management.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-eks-management" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/management-parameters.json \
+              --output text >> ~/checkIfDeployed.txt
+            cat ~/checkIfDeployed.txt
             
-  #     - run:
-  #         name: Extract the IPs for Ansible
-  #         command: |
-  #           echo [management] > ~/inventory.txt
-  #           aws ec2 describe-instances \
-  #             --region "${AWS_DEFAULT_REGION}" \
-  #             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #             --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-management*" \
-  #             --output text >> ~/inventory.txt
-  #           cat ~/inventory.txt
-  #     - persist_to_workspace:
-  #         root: ~/
-  #         paths:
-  #           - inventory.txt
-  #           - checkIfDeployed.txt
+      - run:
+          name: Extract the IPs for Ansible
+          command: |
+            echo [management] > ~/inventory.txt
+            aws ec2 describe-instances \
+              --region "${AWS_DEFAULT_REGION}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-management*" \
+              --output text >> ~/inventory.txt
+            cat ~/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - inventory.txt
+            - checkIfDeployed.txt
      
-  #     - destroy_environment
+      - destroy_environment
       
   
-  # configure-infrastructure:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Wait 2 min
-  #         command: |
-  #           echo "Wait 120 seconds..."
-  #           sleep 120
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Wait 2 min
+          command: |
+            echo "Wait 120 seconds..."
+            sleep 120
               
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Install SSH client
-  #         command: |
-  #           apk update
-  #           apk add openssh-client
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               cd ansible
-  #               ansible-playbook -i ~/inventory.txt configure-server.yml -vvv
-  #             fi
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Install SSH client
+          command: |
+            apk update
+            apk add openssh-client
+      - run:
+          name: Configure server
+          command: |
+            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
+              then
+                cat ~/inventory.txt
+                echo "Our management instances are already configured."
+              else
+                cat ~/inventory.txt
+                cd ansible
+                ansible-playbook -i ~/inventory.txt configure-server.yml -vvv
+              fi
   
-  # configure-cluster:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Wait 2 min
-  #         command: |
-  #           echo "Wait 120 seconds..."
-  #           sleep 120
-  #     - run:
-  #         name: Install ansible dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Install SSH client
-  #         command: |
-  #           apk update
-  #           apk add openssh-client
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               cd ansible
-  #               ansible-playbook -i ~/inventory.txt configure-cluster.yml -vvv
-  #             fi
-  #     - run:
-  #         name: Wait for LoadBalancer's domain
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               echo "Wait 120 seconds..."
-  #               sleep 120
-  #             fi
-  #     - run:
-  #         name: Display LoadBalancer's DNS name
-  #         command: |
-  #           cat ~/inventory.txt
-  #           cd ansible
-  #           ansible-playbook -i ~/inventory.txt save-elb-dns.yml -vvv
-  #           cat ~/elb_dns.txt
-  #     - persist_to_workspace:
-  #         root: ~/
-  #         paths:
-  #           - elb_dns.txt
+  configure-cluster:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Wait 2 min
+          command: |
+            echo "Wait 120 seconds..."
+            sleep 120
+      - run:
+          name: Install ansible dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Install SSH client
+          command: |
+            apk update
+            apk add openssh-client
+      - run:
+          name: Configure server
+          command: |
+            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
+              then
+                cat ~/inventory.txt
+                echo "Our management instances are already configured."
+              else
+                cat ~/inventory.txt
+                cd ansible
+                ansible-playbook -i ~/inventory.txt configure-cluster.yml -vvv
+              fi
+      - run:
+          name: Wait for LoadBalancer's domain
+          command: |
+            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
+              then
+                cat ~/inventory.txt
+                echo "Our management instances are already configured."
+              else
+                cat ~/inventory.txt
+                echo "Wait 120 seconds..."
+                sleep 120
+              fi
+      - run:
+          name: Display LoadBalancer's DNS name
+          command: |
+            cat ~/inventory.txt
+            cd ansible
+            ansible-playbook -i ~/inventory.txt save-elb-dns.yml -vvv
+            cat ~/elb_dns.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - elb_dns.txt
   
-  # deploy-docker:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Install SSH client
-  #         command: |
-  #           apk update
-  #           apk add openssh-client
-  #     - run:
-  #         name: Deploy newest Docker Image
-  #         command: |
-  #           cat ~/inventory.txt
-  #           cd ansible
-  #           ansible-playbook -i ~/inventory.txt deploy-app.yml -vvv
-  #         no_output_timeout: 2m
+  deploy-docker:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "59:eb:83:cf:28:86:0e:34:d0:65:b0:b7:15:f4:0b:0f"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Install SSH client
+          command: |
+            apk update
+            apk add openssh-client
+      - run:
+          name: Deploy newest Docker Image
+          command: |
+            cat ~/inventory.txt
+            cd ansible
+            ansible-playbook -i ~/inventory.txt deploy-app.yml -vvv
+          no_output_timeout: 2m
   
-  # cleanup:
-  #       docker:
-  #       - image: amazon/aws-cli
-  #       steps:
-  #       - checkout
-  #       - run:
-  #           name: Delete Stack to avoid costs
-  #           command: |
-  #               aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-management
-  #               aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
-  #               aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
-  #               aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
-  #               echo "=======================Delete Confirmed========================"
+  cleanup:
+        docker:
+        - image: amazon/aws-cli
+        steps:
+        - checkout
+        - run:
+            name: Delete Stack to avoid costs
+            command: |
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-management
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-nodegroup
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-cluster
+                aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-eks-network
+                echo "=======================Delete Confirmed========================"
                 
 workflows:
   default:
     jobs:
       - test-build
-      # - upload-docker:
-      #     requires:
-      #       - test-build
-      # - deploy-infrastructure:
-      #     requires:
-      #       - test-build
-      # - configure-infrastructure:
-      #     requires:
-      #       - deploy-infrastructure
-      # - configure-cluster:
-      #     requires:
-      #       - configure-infrastructure
-      #       - upload-docker
-      # - deploy-docker:
-      #     requires:
-      #       - configure-cluster
+      - upload-docker:
+          requires:
+            - test-build
+      - deploy-infrastructure:
+          requires:
+            - test-build
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
+      - configure-cluster:
+          requires:
+            - configure-infrastructure
+            - upload-docker
+      - deploy-docker:
+          requires:
+            - configure-cluster
       # - cleanup:
       #     requires:
       #       - deploy-docker
